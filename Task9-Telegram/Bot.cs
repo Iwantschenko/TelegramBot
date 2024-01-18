@@ -1,90 +1,125 @@
-﻿using System;
+﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
+using System.Resources;
+using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.InlineQueryResults;
 using Telegram.Bot.Types.ReplyMarkups;
+using static System.Net.Mime.MediaTypeNames;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Task9_Telegram
 {
-    public class Bot
+   
+    public class Bot 
     {
-       
+        private bool IsBoardCreate = false;
+        private ResourceManager _resource;
+        private CachingCurrency _currencyCache;
+
         public Bot(string path )
         {
+            _resource = new ResourceManager("Task9_Telegram.Resource" , Assembly.GetExecutingAssembly());
+            var cache = new MemoryCache(new MemoryCacheOptions());
+            _currencyCache = new CachingCurrency(cache);
             TelegramBotClient client = new TelegramBotClient(path);
             client.StartReceiving(Update, Error);
-            
+           
+
         }
-      
-        static async Task Update(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+        private bool CheckCurrencyMessage(string line , out string result)
+        {
+            string keyWord = "key";
+            
+            int index = line.IndexOf(keyWord);
+            if (index != -1)
+            {
+               result = line.Substring(index + keyWord.Length);
+                return true;
+            }
+            else
+            {
+                result = string.Empty;
+                return false;
+            }
+        }
+        async Task Update(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             var message = update.Message;
-
-            if (message.Text != null)
+            if (!IsBoardCreate)
             {
-                message.Text = message.Text.ToLower();
-                message.Text = message.Text.Replace(" ", string.Empty);
-                if (DateTime.TryParseExact(message.Text ,"dd.MM.yyyy",null, System.Globalization.DateTimeStyles.None, out DateTime date))
+                ReplyKeyboardMarkup replyKeyboardMarkup = new(new[] { new KeyboardButton[] { "/Help", "/EnterDate", "/ShowCurrency" }, })
                 {
-                    //do parsing
-                }
-                switch (message.Text)
-                {
-                    case "/help":
-                        {
-                            //do help
-                        }
-                        break;
-                    case "/showCurrency":
-                        {
-                            //show currency
-                        }
-                        break;
-                        /*
-                     default:
-                        {
-                            ReplyKeyboardMarkup replyKeyboardMarkup = new(new[] { new KeyboardButton[] { "/Help", "/EnterData" }, })
-                            {
-                                ResizeKeyboard = true
-                            };
-
-                            InlineKeyboardMarkup inlineKeyboard = new(new[]{
-                                // first row
-                                new []
-                                {
-                                    InlineKeyboardButton.WithCallbackData(text: "1.1", callbackData: "11"),
-                                    InlineKeyboardButton.WithCallbackData(text: "1.2", callbackData: "12"),
-                                },
-                                // second row
-                                new []
-                                {
-                                    InlineKeyboardButton.WithCallbackData(text: "2.1", callbackData: "21"),
-                                    InlineKeyboardButton.WithCallbackData(text: "2.2", callbackData: "22"),
-                                },
-                            });
-                            Message seMessage = await botClient.SendTextMessageAsync(
+                    ResizeKeyboard = true
+                };
+                Message sentMessage = await botClient.SendTextMessageAsync(
                                 chatId: message.Chat.Id,
                                 text: "Оберіть дії",
                                 replyMarkup: replyKeyboardMarkup,
                                 cancellationToken: cancellationToken);
-                            Message sentMessage = await botClient.SendTextMessageAsync(
+                IsBoardCreate = true;
+            }
+            if (message.Text != null)
+            {
+                message.Text = message.Text.ToLower();
+                message.Text = message.Text.Replace(" ", string.Empty);
+                if (CheckCurrencyMessage(message.Text , out string key ))
+                {
+                    Message seMessage = await botClient.SendTextMessageAsync(
                                 chatId: message.Chat.Id,
-                                text: "Оберіть дії",
-                                replyMarkup: inlineKeyboard,
+                                text: _currencyCache.GetCurrency(key),
+                                cancellationToken: cancellationToken) ;
+                }
+                if (DateTime.TryParseExact(message.Text ,"dd.MM.yyyy",null, System.Globalization.DateTimeStyles.None, out DateTime date))
+                {
+                    _currencyCache.RefreshCurrency(date);
+                    Message seMessage = await botClient.SendTextMessageAsync(
+                                chatId: message.Chat.Id,
+                                text: $"{_resource.GetString("ChangeDate")} {date})",
+                                cancellationToken: cancellationToken);
+                }
+
+                switch (message.Text)
+                {
+                    case "/help":
+                        {
+                       
+                            Message seMessage = await botClient.SendTextMessageAsync(
+                                chatId: message.Chat.Id,
+                                text: _resource.GetString("HelpMessage"),
                                 cancellationToken: cancellationToken);
                         }
-                        break
-                        */
+                        break;
+                    case "/enterdate":
+                        {
+                            Message seMessage = await botClient.SendTextMessageAsync(
+                                chatId: message.Chat.Id,
+                                text: _resource.GetString("EnterDateMessage"),
+                                cancellationToken: cancellationToken);
+                        }
+                        break;
+                    case "/showcurrency":
+                        {
+                            //show currency
+                        }
+                        break;
                 };
             }
         }
-
+        
         static Task Error(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
 
