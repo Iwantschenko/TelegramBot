@@ -29,7 +29,7 @@ namespace Task9_Telegram
         private bool IsBoardCreate = false;
         private ResourceManager _resource;
         private CachingCurrency _currencyCache;
-
+        private DateTime _DateCurrency;
         public Bot(string path )
         {
             _resource = new ResourceManager("Task9_Telegram.Resource" , Assembly.GetExecutingAssembly());
@@ -40,9 +40,9 @@ namespace Task9_Telegram
            
 
         }
-        private bool CheckCurrencyMessage(string line , out string result)
+        private bool CurrencyMessageCheck(string line , out string result)
         {
-            string keyWord = "key";
+            string keyWord = "key-";
             
             int index = line.IndexOf(keyWord);
             if (index != -1)
@@ -56,6 +56,18 @@ namespace Task9_Telegram
                 return false;
             }
         }
+        private bool InputDateCheck(DateTime date)
+        {
+            if (date <= DateTime.Now && date.Year >= DateTime.Now.Year-4)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
         async Task Update(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             var message = update.Message;
@@ -67,7 +79,7 @@ namespace Task9_Telegram
                 };
                 Message sentMessage = await botClient.SendTextMessageAsync(
                                 chatId: message.Chat.Id,
-                                text: "Оберіть дії",
+                                text: _resource.GetString("CreateBoard"),
                                 replyMarkup: replyKeyboardMarkup,
                                 cancellationToken: cancellationToken);
                 IsBoardCreate = true;
@@ -76,27 +88,42 @@ namespace Task9_Telegram
             {
                 message.Text = message.Text.ToLower();
                 message.Text = message.Text.Replace(" ", string.Empty);
-                if (CheckCurrencyMessage(message.Text , out string key ))
+
+                if (CurrencyMessageCheck(message.Text, out string key))
                 {
                     Message seMessage = await botClient.SendTextMessageAsync(
                                 chatId: message.Chat.Id,
                                 text: _currencyCache.GetCurrency(key),
-                                cancellationToken: cancellationToken) ;
-                }
-                if (DateTime.TryParseExact(message.Text ,"dd.MM.yyyy",null, System.Globalization.DateTimeStyles.None, out DateTime date))
-                {
-                    _currencyCache.RefreshCurrency(date);
-                    Message seMessage = await botClient.SendTextMessageAsync(
-                                chatId: message.Chat.Id,
-                                text: $"{_resource.GetString("ChangeDate")} {date})",
                                 cancellationToken: cancellationToken);
+                    return;
+                }
+
+                if (DateTime.TryParseExact(message.Text, "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out DateTime date))
+                {
+                    
+                    if (InputDateCheck(date))
+                    {
+                        _currencyCache.RefreshCurrency(date);
+                        Message AccesMessage = await botClient.SendTextMessageAsync(
+                                    chatId: message.Chat.Id,
+                                    text: $"{_resource.GetString("ChangeDate")} {{{date}}})",
+                                    cancellationToken: cancellationToken);
+                    }
+                    else
+                    {
+                        Message errorMessage = await botClient.SendTextMessageAsync(
+                                    chatId: message.Chat.Id,
+                                    text: _resource.GetString("ErrorDate"),
+                                    cancellationToken: cancellationToken);
+                    }
+                    return;
                 }
 
                 switch (message.Text)
                 {
                     case "/help":
                         {
-                       
+
                             Message seMessage = await botClient.SendTextMessageAsync(
                                 chatId: message.Chat.Id,
                                 text: _resource.GetString("HelpMessage"),
@@ -113,7 +140,18 @@ namespace Task9_Telegram
                         break;
                     case "/showcurrency":
                         {
-                            //show currency
+                            Message seMessage = await botClient.SendTextMessageAsync(
+                                chatId: message.Chat.Id,
+                                text: _resource.GetString("ChooseDateKey"),
+                                cancellationToken: cancellationToken);
+                        }
+                        break;
+                    default:
+                        {
+                            Message seMessage = await botClient.SendTextMessageAsync(
+                                chatId: message.Chat.Id,
+                                text: $"{_resource.GetString("DefaultAnswer")} ({message.Text})",
+                                cancellationToken: cancellationToken);
                         }
                         break;
                 };

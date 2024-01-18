@@ -118,10 +118,32 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ChangeDate" xml:space="preserve">
-    <value>Data changed to</value>
+    <value>Date changed to </value>
+  </data>
+  <data name="ChooseDateKey" xml:space="preserve">
+    <value>Examples of currency codes
+---------------------------
+AUD  | AZN  | BYN | CAD
+CHF   | CNY  | CZK  | DKK
+EUR   | GBP  | GEL   |  HUF
+ILS     | JPY   | KZT   | MDL
+NOK  | PLN  | SEK   | SGD
+TMT   | TRY  | UAH | USD
+UZS   | XAU |          |     
+---------------------------
+Enter this format "Key- YOUR KEY CURRENCY"</value>
+  </data>
+  <data name="CreateBoard" xml:space="preserve">
+    <value>Hi.I`m currency bot, click on my buttons)</value>
+  </data>
+  <data name="DefaultAnswer" xml:space="preserve">
+    <value>I don`t know this comand </value>
   </data>
   <data name="EnterDateMessage" xml:space="preserve">
     <value>Please input date for currency in this format ( dd.MM.yyyy ) like this (31.12.2023)</value>
+  </data>
+  <data name="ErrorDate" xml:space="preserve">
+    <value>I`m sorry. Input date is not valid . Currency data for the last 4 years</value>
   </data>
   <data name="HelpMessage" xml:space="preserve">
     <value>Hi!
@@ -129,9 +151,5 @@ This bot can showing the exchange rate of foreince currency to UAH.
 /Help - information about bot.
 /EnterDate - click on it and input date for foreince currency .
 /ShowCurrency - shows a collection of currencies that you can view.</value>
-    <comment>sada</comment>
-  </data>
-  <data name="String2" xml:space="preserve">
-    <value />
   </data>
 </root>
