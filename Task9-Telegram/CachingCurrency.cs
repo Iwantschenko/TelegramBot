@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Task9_Telegram
 {
-    public class CachingCurrency
+    public class CachingCurrency 
     {
         private IMemoryCache _cache;
         public CachingCurrency(IMemoryCache memoryCache)

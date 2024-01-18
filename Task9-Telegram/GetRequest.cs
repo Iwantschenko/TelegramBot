@@ -13,6 +13,7 @@ namespace Task9_Telegram
         private string _url;
         public string Response { get; private set; }
 
+        public GetRequest() { }
         public GetRequest(string path)
         {
             _url = path;

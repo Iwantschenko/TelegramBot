@@ -40,7 +40,7 @@ namespace Task9_Telegram
            
 
         }
-        private bool CurrencyMessageCheck(string line , out string result)
+        static public bool CurrencyMessageCheck(string line , out string result)
         {
             string keyWord = "key-";
             
@@ -56,7 +56,7 @@ namespace Task9_Telegram
                 return false;
             }
         }
-        private bool InputDateCheck(DateTime date)
+        static public  bool InputDateCheck(DateTime date)
         {
             if (date <= DateTime.Now && date.Year >= DateTime.Now.Year-4)
             {
@@ -68,7 +68,7 @@ namespace Task9_Telegram
             }
 
         }
-        async Task Update(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+        public async Task Update(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             var message = update.Message;
             if (!IsBoardCreate)
@@ -158,7 +158,7 @@ namespace Task9_Telegram
             }
         }
         
-        static Task Error(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+        public Task Error(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
 
             return Task.CompletedTask;
