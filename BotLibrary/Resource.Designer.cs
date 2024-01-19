@@ -107,7 +107,7 @@ namespace BotLibrary {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Please input date for currency in this format ( dd.MM.yyyy ) like this (31.12.2023).
+        ///   Looks up a localized string similar to Enter the date for the currency for the last 4 years..
         /// </summary>
         internal static string EnterDateMessage {
             get {

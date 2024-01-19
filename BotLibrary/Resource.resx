@@ -140,7 +140,7 @@ Enter this format "Key- YOUR KEY CURRENCY"</value>
     <value>I don`t know this comand</value>
   </data>
   <data name="EnterDateMessage" xml:space="preserve">
-    <value>Please input date for currency in this format ( dd.MM.yyyy ) like this (31.12.2023)</value>
+    <value>Enter the date for the currency for the last 4 years.</value>
   </data>
   <data name="ErrorDate" xml:space="preserve">
     <value>I`m sorry. Input date is not valid . Currency data for the last 4 years</value>
