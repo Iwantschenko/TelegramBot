@@ -1,64 +1,36 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Resources;
-using System.Security.Cryptography;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.InlineQueryResults;
+using Microsoft.Extensions.Caching.Memory;
 using Telegram.Bot.Types.ReplyMarkups;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace Task9_Telegram
+using Telegram.Bot.Types;
+namespace BotLibrary
 {
-   
-    public class Bot 
+    public class Bot
     {
         private bool IsBoardCreate = false;
         private ResourceManager _resource;
         private CachingCurrency _currencyCache;
-        private DateTime _DateCurrency;
-        public Bot(string path )
+
+        public Bot(string path)
         {
-            _resource = new ResourceManager("Task9_Telegram.Resource" , Assembly.GetExecutingAssembly());
+            _resource = new ResourceManager("BotLibrary.Resource", Assembly.GetExecutingAssembly());
             var cache = new MemoryCache(new MemoryCacheOptions());
             _currencyCache = new CachingCurrency(cache);
             TelegramBotClient client = new TelegramBotClient(path);
             client.StartReceiving(Update, Error);
-           
+
 
         }
-        static public bool CurrencyMessageCheck(string line , out string result)
+       
+        static public bool InputDateCheck(DateTime date)
         {
-            string keyWord = "key-";
-            
-            int index = line.IndexOf(keyWord);
-            if (index != -1)
-            {
-               result = line.Substring(index + keyWord.Length);
-                return true;
-            }
-            else
-            {
-                result = string.Empty;
-                return false;
-            }
-        }
-        static public  bool InputDateCheck(DateTime date)
-        {
-            if (date <= DateTime.Now && date.Year >= DateTime.Now.Year-4)
+            if (date <= DateTime.Now && date.Year >= DateTime.Now.Year - 4)
             {
                 return true;
             }
@@ -89,18 +61,18 @@ namespace Task9_Telegram
                 message.Text = message.Text.ToLower();
                 message.Text = message.Text.Replace(" ", string.Empty);
 
-                if (CurrencyMessageCheck(message.Text, out string key))
+                if (message.Text.Length == 3)
                 {
                     Message seMessage = await botClient.SendTextMessageAsync(
                                 chatId: message.Chat.Id,
-                                text: _currencyCache.GetCurrency(key),
+                                text: _currencyCache.GetCurrency(message.Text),
                                 cancellationToken: cancellationToken);
                     return;
                 }
 
-                if (DateTime.TryParseExact(message.Text, "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out DateTime date))
+                if (DateTime.TryParse(message.Text , out DateTime date))
                 {
-                    
+
                     if (InputDateCheck(date))
                     {
                         _currencyCache.RefreshCurrency(date);
@@ -156,8 +128,15 @@ namespace Task9_Telegram
                         break;
                 };
             }
+            else
+            {
+                Message seMessage = await botClient.SendTextMessageAsync(
+                               chatId: message.Chat.Id,
+                               text: _resource.GetString("TextNotNullReference"),
+                               cancellationToken: cancellationToken);
+            }
         }
-        
+
         public Task Error(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
 

@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
-using Task9_Telegram;
+using BotLibrary;
 using Telegram.Bot.Types;
 using Telegram.Bot;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -47,15 +47,7 @@ namespace TestTask
             Assert.AreEqual(expectedValue,res);
         }
 
-        [Test]
-        public void Bot_Check_KeyWord()
-        {
-            string line = "key-USD";
-            string expected = "USD";
-            bool boolRes = Bot.CurrencyMessageCheck(line, out string result);
-            Assert.IsTrue(boolRes);
-            Assert.AreEqual(expected,result);
-        }
+        
 
         [Test]
         public void Bot_Check_Date_True()

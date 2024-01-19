@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Task9_Telegram
+namespace BotLibrary
 {
-    public class CachingCurrency 
+    public class CachingCurrency
     {
         private IMemoryCache _cache;
         public CachingCurrency(IMemoryCache memoryCache)
@@ -21,7 +21,7 @@ namespace Task9_Telegram
             {
                 return value;
             }
-            else 
+            else
                 return "there is no such currency or the date is missing ";
         }
         public void RefreshCurrency(DateTime date)
@@ -30,7 +30,7 @@ namespace Task9_Telegram
             request.Run();
             var json = JObject.Parse(request.Response);
             var currencies = json["exchangeRate"];
-            
+
             var options = new MemoryCacheEntryOptions()
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10),
@@ -43,7 +43,7 @@ namespace Task9_Telegram
                               $"Sale rate: {item["saleRateNB"]}\n" +
                               $"Purchase rate: {item["purchaseRateNB"]}\n";
 
-                _cache.Set(item["currency"].ToString().ToLower(), data , options);
+                _cache.Set(item["currency"].ToString().ToLower(), data, options);
             }
 
         }

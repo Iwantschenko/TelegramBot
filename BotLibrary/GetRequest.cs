@@ -5,7 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Task9_Telegram
+namespace BotLibrary
 {
     public class GetRequest
     {
